@@ -1,0 +1,70 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  PNPM_VERSION: 8.x
+  CI: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ env.PNPM_VERSION }}
+        
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - name: Setup pnpm cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+          
+    - name: Install dependencies
+      shell: bash
+      run: |
+        if [ -f pnpm-lock.yaml ]; then
+          echo "Installing dependencies with frozen lockfile..."
+          pnpm install --frozen-lockfile
+        else
+          echo "No lockfile found. Installing dependencies..."
+          pnpm install
+        fi
+
+    - name: Lint
+      run: pnpm dlx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0
+      env:
+        NEXT_TELEMETRY_DISABLED: 1
+      
+    - name: Type check
+      run: pnpm exec tsc --noEmit
+      
+    - name: Build
+      run: pnpm build
+      env:
+        NEXT_TELEMETRY_DISABLED: 1
