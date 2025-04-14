@@ -7,27 +7,21 @@ import { Calendar, Users, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { BackgroundAnimationContext } from "@/context/background-animation-context"
 
+// Pre-calculate random positions and sizes for floating elements
+const floatingElements = Array.from({ length: 6 }).map((_, i) => ({
+  width: 83.52958460431624 + (i * 10),
+  height: 121.94693872445325 + (i * 5),
+  left: 31.99495952914487 + (i * 15),
+  top: 13.968465198781587 + (i * 10),
+  offsetX: 20,
+  offsetY: 15,
+  duration: 4 + (i * 0.5)
+}));
+
 export default function HeroSection() {
   const [isMounted, setIsMounted] = useState(false)
   const { animationKey } = useContext(BackgroundAnimationContext)
   const floatingElementsRef = useRef(null)
-
-  // Generate random positions for floating elements
-  const generateRandomPositions = () => {
-    return Array(6)
-      .fill(0)
-      .map(() => ({
-        width: Math.random() * 100 + 50,
-        height: Math.random() * 100 + 50,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        yMovement: Math.random() * 30 - 15,
-        xMovement: Math.random() * 30 - 15,
-        duration: Math.random() * 5 + 3,
-      }))
-  }
-
-  const [floatingElements] = useState(() => generateRandomPositions())
 
   useEffect(() => {
     setIsMounted(true)
@@ -40,24 +34,24 @@ export default function HeroSection() {
 
       {/* Floating elements */}
       <div className="absolute inset-0 overflow-hidden" ref={floatingElementsRef}>
-        {floatingElements.map((element, i) => (
+        {floatingElements.map((config, i) => (
           <motion.div
             key={`${i}-${animationKey}`}
             className="absolute rounded-full bg-arisze-blue/20 dark:bg-arisze-blue/10"
             style={{
-              width: `${element.width}px`,
-              height: `${element.height}px`,
-              left: `${element.left}%`,
-              top: `${element.top}%`,
+              width: `${config.width}px`,
+              height: `${config.height}px`,
+              left: `${config.left}%`,
+              top: `${config.top}%`,
             }}
             animate={{
-              y: [0, element.yMovement],
-              x: [0, element.xMovement],
+              y: [0, config.offsetY],
+              x: [0, config.offsetX],
               scale: [1, 1.05, 1],
               opacity: [0.5, 0.7, 0.5],
             }}
             transition={{
-              duration: element.duration,
+              duration: config.duration,
               repeat: Number.POSITIVE_INFINITY,
               repeatType: "reverse",
             }}

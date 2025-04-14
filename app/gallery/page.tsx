@@ -233,6 +233,17 @@ const moodOptions = ["Relaxing", "Energetic", "Social", "Productive", "Creative"
 // Time of day options
 const timeOptions = ["Morning", "Afternoon", "Evening", "Any time"]
 
+// Pre-calculate random positions and sizes for floating elements
+const floatingElements = Array.from({ length: 6 }).map(() => ({
+  width: 50 + 50,
+  height: 50 + 50,
+  left: 50,
+  top: 50,
+  offsetX: 15,
+  offsetY: 15,
+  duration: 4,
+}))
+
 export default function GalleryPage() {
   const [mounted, setMounted] = useState(false)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
@@ -330,22 +341,22 @@ export default function GalleryPage() {
 
         {/* Floating elements */}
         <div className="absolute inset-0 overflow-hidden">
-          {[...Array(6)].map((_, i) => (
+          {floatingElements.map((config, i) => (
             <motion.div
               key={i}
               className="absolute rounded-full bg-arisze-blue/20 dark:bg-arisze-blue/10"
               style={{
-                width: `${Math.random() * 100 + 50}px`,
-                height: `${Math.random() * 100 + 50}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                width: `${config.width}px`,
+                height: `${config.height}px`,
+                left: `${config.left}%`,
+                top: `${config.top}%`,
               }}
               animate={{
-                y: [0, Math.random() * 30 - 15],
-                x: [0, Math.random() * 30 - 15],
+                y: [0, config.offsetY],
+                x: [0, config.offsetX],
               }}
               transition={{
-                duration: Math.random() * 5 + 3,
+                duration: config.duration,
                 repeat: Number.POSITIVE_INFINITY,
                 repeatType: "reverse",
               }}
@@ -485,8 +496,8 @@ export default function GalleryPage() {
                       <div>
                         <h3 className="text-sm font-semibold mb-4">When do you want to do something?</h3>
                         <div className="flex flex-wrap gap-2">
-                          {["Any time", ...timeOptions].map((time) => (
-                            <Button
+                          {timeOptions.map((time) => (
+                            <Button 
                               key={time}
                               variant={selectedTime === time ? "default" : "outline"}
                               onClick={() => setSelectedTime(time)}
@@ -495,10 +506,7 @@ export default function GalleryPage() {
                               }`}
                               size="sm"
                             >
-                              {time === "Morning" && <Clock className="mr-1 h-3 w-3" />}
-                              {time === "Afternoon" && <Clock className="mr-1 h-3 w-3" />}
-                              {time === "Evening" && <Clock className="mr-1 h-3 w-3" />}
-                              {time === "Any time" && <Clock className="mr-1 h-3 w-3" />}
+                              <Clock className="mr-1 h-3 w-3" />
                               {time}
                             </Button>
                           ))}
