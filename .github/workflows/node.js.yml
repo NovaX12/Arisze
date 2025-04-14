@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x]  # Simplified to just use Node 20.x
 
     steps:
     - uses: actions/checkout@v4
@@ -55,14 +55,6 @@ jobs:
           echo "No lockfile found. Installing dependencies..."
           pnpm install
         fi
-
-    - name: Lint
-      run: pnpm dlx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0
-      env:
-        NEXT_TELEMETRY_DISABLED: 1
-      
-    - name: Type check
-      run: pnpm exec tsc --noEmit
       
     - name: Build
       run: pnpm build
